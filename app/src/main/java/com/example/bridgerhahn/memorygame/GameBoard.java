@@ -23,6 +23,9 @@ public class GameBoard extends SurfaceView implements Runnable{
 
     // Control frame rate
     private long nextFrameTime;
+    private long flipBackTime;
+    private boolean needsFlipBack = false;
+    private final long SECONDS_BEFORE_FLIP_BACK = 1;
     private final long FPS = 10;
     private final long MILLIS_PER_SECOND = 1000;
 
@@ -57,6 +60,7 @@ public class GameBoard extends SurfaceView implements Runnable{
 
     private boolean isFirstSelected = false;
     private MemoryCard firstSelected;
+    private MemoryCard secondSelected;
 
     /**
      *
@@ -146,6 +150,7 @@ public class GameBoard extends SurfaceView implements Runnable{
 
         // Set up for an update
         nextFrameTime = System.currentTimeMillis();
+        flipBackTime = System.currentTimeMillis();
     }
 
     private void update() {
@@ -153,6 +158,13 @@ public class GameBoard extends SurfaceView implements Runnable{
         if(score >= numColumns * numRows / 2) {
             newGame();
             //TODO something nicer than just starting over
+        }
+
+        // Check if flip back is needed
+        if(needsFlipBack && flipBackTime <= System.currentTimeMillis()) {
+            firstSelected.flipCard();
+            secondSelected.flipCard();
+            needsFlipBack = false;
         }
     }
 
@@ -220,6 +232,9 @@ public class GameBoard extends SurfaceView implements Runnable{
      * @param y y coord in card array
      */
     private void selectCard(int x, int y) {
+        //If it's too soon to flip again
+        if(needsFlipBack) return;
+
         MemoryCard selected = cards[y][x];
         if(selected.isFaceUp()) {
             //TODO real message output
@@ -239,9 +254,9 @@ public class GameBoard extends SurfaceView implements Runnable{
             if(firstSelected.getIdentity() == selected.getIdentity()) {
                 score++;
             } else {
-                //TODO flips back immediately. Fix this
-                firstSelected.flipCard();
-                selected.flipCard();
+                secondSelected = selected;
+                needsFlipBack = true;
+                flipBackTime = System.currentTimeMillis() + SECONDS_BEFORE_FLIP_BACK * MILLIS_PER_SECOND;
             }
             isFirstSelected = false;
         }
