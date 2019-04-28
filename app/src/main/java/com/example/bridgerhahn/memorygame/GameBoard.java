@@ -37,6 +37,8 @@ public class GameBoard extends SurfaceView implements Runnable{
     private SurfaceHolder surfaceHolder;
     private Paint paint;
 
+    private int[] colors;
+
     // Vertical margin in percent of screen
     private static final double VERTICAL_MARGIN_PERCENT = .05;
 
@@ -145,6 +147,15 @@ public class GameBoard extends SurfaceView implements Runnable{
             cards[row][column] = new MemoryCard(order[i]);
         }
 
+        // Set up random colors for cards
+        colors = new int[numRows * numColumns / 2];
+        for(int i = 0; i < colors.length; i++) {
+            int r = (int) (Math.random() * 255);
+            int g = (int) (Math.random() * 255);
+            int b = (int) (Math.random() * 255);
+            colors[i] = Color.argb(255, r, g, b);
+        }
+
         // Reset score
         score = 0;
 
@@ -190,6 +201,11 @@ public class GameBoard extends SurfaceView implements Runnable{
                     int right = firstX + cardSize * (x+1) - 1;
                     int top = firstY + cardSize * y + 1;
                     int bottom = firstY + cardSize * (y+1) - 1;
+                    if(cards[y][x].isFaceUp()) {
+                        paint.setColor(colors[cards[y][x].getIdentity()]);
+                    } else {
+                        paint.setColor(Color.argb(255,255,255,255));
+                    }
                     canvas.drawRect(left, top, right, bottom, paint);
                 }
             }
