@@ -54,7 +54,10 @@ public class GameBoard extends SurfaceView implements Runnable{
     private int firstY;
 
     // Player score
-    private int score = 0;
+    private int matched;
+    private int score;
+    private static final int POINTS_PER_MATCH = 1000;
+    private static final int SCORE_DECREASE_PER_SECOND = 10;
 
     // Number of times the board will be shuffled before play
     private static final int NUM_RANDOMIZES = 5;
@@ -69,7 +72,7 @@ public class GameBoard extends SurfaceView implements Runnable{
      *
      * @param difficulty corresponds to the number of rows/columns to the game
      */
-    public GameBoard(Context context, int difficulty, Point screenSize) {
+    GameBoard(Context context, int difficulty, Point screenSize) {
         super(context);
         this.context = context;
         screenX = screenSize.x;
@@ -103,7 +106,7 @@ public class GameBoard extends SurfaceView implements Runnable{
         }
     }
 
-    public void pause() {
+    void pause() {
         isPlaying = false;
         try {
             thread.join();
@@ -113,7 +116,7 @@ public class GameBoard extends SurfaceView implements Runnable{
         }
     }
 
-    public void resume() {
+    void resume() {
         isPlaying = true;
         thread = new Thread(this);
         thread.start();
@@ -157,6 +160,7 @@ public class GameBoard extends SurfaceView implements Runnable{
 
         // Reset score
         score = 0;
+        matched = 0;
 
         // Set up for an update
         nextFrameTime = System.currentTimeMillis();
@@ -165,7 +169,7 @@ public class GameBoard extends SurfaceView implements Runnable{
 
     private void update() {
         // Check for win
-        if(score >= numColumns * numRows / 2) {
+        if(matched >= numColumns * numRows / 2) {
             newGame();
             //TODO something nicer than just starting over
         }
@@ -176,6 +180,9 @@ public class GameBoard extends SurfaceView implements Runnable{
             secondSelected.flipCard();
             needsFlipBack = false;
         }
+
+        //Lose points every update
+        score = Math.max(score - (int) (SCORE_DECREASE_PER_SECOND / FPS), 0);
     }
 
     private void draw() {
@@ -267,7 +274,8 @@ public class GameBoard extends SurfaceView implements Runnable{
         else {
             // Check for match
             if(firstSelected.getIdentity() == selected.getIdentity()) {
-                score++;
+                score += POINTS_PER_MATCH;
+                matched++;
             } else {
                 secondSelected = selected;
                 needsFlipBack = true;
