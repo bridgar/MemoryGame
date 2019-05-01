@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.support.v4.graphics.ColorUtils;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -147,13 +148,11 @@ public class GameBoard extends SurfaceView implements Runnable{
             cards[row][column] = new MemoryCard(order[i]);
         }
 
-        // Set up random colors for cards
+        // Set up evenly spaced colors for cards
         colors = new int[numRows * numColumns / 2];
         for(int i = 0; i < colors.length; i++) {
-            int r = (int) (Math.random() * 255);
-            int g = (int) (Math.random() * 255);
-            int b = (int) (Math.random() * 255);
-            colors[i] = Color.argb(255, r, g, b);
+            float[] hsl = {(float) (i * 360.0 / colors.length), 1, 0.5f};
+            colors[i] = ColorUtils.HSLToColor(hsl);
         }
 
         // Reset score
