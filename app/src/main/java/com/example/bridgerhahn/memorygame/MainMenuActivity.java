@@ -13,11 +13,19 @@ public class MainMenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
-        Button memoryGameButton = (Button) findViewById(R.id.memoryGameButton);
+        Button memoryGameButton = findViewById(R.id.memoryGameButton);
         memoryGameButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 selectMemory();
+            }
+        });
+
+        Button snakeGameButton = findViewById(R.id.snakeGameButton);
+        snakeGameButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectSnake();
             }
         });
     }
@@ -25,6 +33,11 @@ public class MainMenuActivity extends AppCompatActivity {
     private void selectMemory() {
         Intent intent = new Intent(this, DifficultyActivity.class);
         intent.putExtra("game", "memory");
+        startActivity(intent);
+    }
+
+    private void selectSnake() {
+        Intent intent = new Intent(this, SnakeGameActivity.class);
         startActivity(intent);
     }
 }
