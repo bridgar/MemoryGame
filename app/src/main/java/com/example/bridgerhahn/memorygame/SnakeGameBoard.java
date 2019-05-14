@@ -74,6 +74,7 @@ public class SnakeGameBoard extends GameBoard implements Runnable {
         for(int[] segment : segments) {
             if(next[0] == segment[0] && next[1] == segment[1]) {
                 newGame();
+                return;
             }
         }
 
@@ -147,6 +148,7 @@ public class SnakeGameBoard extends GameBoard implements Runnable {
     private void newFood() {
         boolean isInSnake = false;
         do {
+            isInSnake = false;
             foodX = (int) (Math.random() * numCellsWide);
             foodY = (int) (Math.random() * NUM_CELLS_HIGH);
             for(int[] pair : segments) {
