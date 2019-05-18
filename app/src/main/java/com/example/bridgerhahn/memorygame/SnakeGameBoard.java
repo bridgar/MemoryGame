@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 
 import java.util.LinkedList;
 
@@ -16,7 +17,7 @@ public class SnakeGameBoard extends GameBoard implements Runnable {
     private int foodX;
     private int foodY;
 
-    private enum Direction{
+    public enum Direction{
         UP, DOWN, LEFT, RIGHT
     }
     private Direction direction;
@@ -26,6 +27,15 @@ public class SnakeGameBoard extends GameBoard implements Runnable {
     private float rightQuarter;
     private float topQuarter;
     private float bottomQuarter;
+
+    private static final int MIN_SWIPE_DISTANCE_X = 100;
+    private static final int MIN_SWIPE_DISTANCE_Y = 100;
+
+    private static final int MAX_SWIPE_DISTANCE_X = 100;
+    private static final int MAX_SWIPE_DISTANCE_Y = 100;
+
+    private VelocityTracker mVelocityTracker = null;
+    private boolean sameTouch = false;
 
 
     SnakeGameBoard(Context context, Point screenSize) {
@@ -37,7 +47,6 @@ public class SnakeGameBoard extends GameBoard implements Runnable {
         rightQuarter = screenX * 3 / 4;
         topQuarter = screenY / 4;
         bottomQuarter = screenY * 3 / 4;
-
 
         newGame();
     }
@@ -117,18 +126,6 @@ public class SnakeGameBoard extends GameBoard implements Runnable {
                 canvas.drawRect(left, top, right, bottom, paint);
             }
 
-            //draw control lines
-            paint.setARGB(255, 0, 0, 0);
-            canvas.drawLine(0,0, screenX, screenY, paint);
-            canvas.drawLine(0, screenY, screenX, 0, paint);
-
-            //draw control boxes
-//            paint.setARGB(100, 100, 100, 100);
-//            canvas.drawRect(0, 0, leftQuarter, screenY, paint);
-//            canvas.drawRect(rightQuarter, 0, screenX, screenY, paint);
-//            canvas.drawRect(leftQuarter, 0, rightQuarter, topQuarter, paint);
-//            canvas.drawRect(leftQuarter, bottomQuarter, rightQuarter, screenY, paint);
-
             // Unlock the canvas and show render
             surfaceHolder.unlockCanvasAndPost(canvas);
         }
@@ -162,39 +159,55 @@ public class SnakeGameBoard extends GameBoard implements Runnable {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent motionEvent) {
-        switch(motionEvent.getAction() & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_UP:
-                float x = motionEvent.getX();
-                float y = motionEvent.getY();
+    public boolean onTouchEvent(MotionEvent event) {
+        int index = event.getActionIndex();
+        int action = event.getActionMasked();
+        int pointerId = event.getPointerId(index);
 
-                boolean belowLine1 = y > x * screenY / screenX; // Line 1 goes from topLeft to bottomRight
-                boolean belowLine2 = y > screenY - x * screenY / screenX; // Line 2 goes from bottomLeft ot topRight
-
-                if(belowLine1) {
-                    if(belowLine2) {
-                        direction = Direction.DOWN; // below both lines
-                    } else {
-                        direction = Direction.LEFT; // below only line 1
-                    }
-                } else {
-                    if(belowLine2) {
-                        direction = Direction.RIGHT; // below only line 2
-                    } else {
-                        direction = Direction.UP; // below neither line
-                    }
+        switch(action) {
+            case MotionEvent.ACTION_DOWN:
+                if(mVelocityTracker == null) {
+                    mVelocityTracker = VelocityTracker.obtain();
                 }
-
-//                if(x < leftQuarter) {
-//                    direction = Direction.LEFT;
-//                } else if(x > rightQuarter) {
-//                    direction = Direction.RIGHT;
-//                } else if(y < topQuarter) {
-//                    direction = Direction.UP;
-//                } else if(y > bottomQuarter) {
-//                    direction = Direction.DOWN;
-//                }
+                else {
+                    mVelocityTracker.clear();
+                }
+                mVelocityTracker.addMovement(event);
+                sameTouch = false;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                mVelocityTracker.addMovement(event);
+                mVelocityTracker.computeCurrentVelocity(1000);
+                float xv = mVelocityTracker.getXVelocity(pointerId);
+                float yv = mVelocityTracker.getYVelocity(pointerId);
+                if(!sameTouch) {
+                    if (Math.abs(xv) > Math.abs(yv)) {
+                        if (xv > 0) {
+                            direction = Direction.RIGHT;
+                        } else {
+                            direction = Direction.LEFT;
+                        }
+                    } else {
+                        if (yv > 0) {
+                            direction = Direction.DOWN;
+                        } else {
+                            direction = Direction.UP;
+                        }
+                    }
+                    sameTouch = true;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                sameTouch = false;
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
+                break;
         }
         return true;
+
     }
+
+
 }
