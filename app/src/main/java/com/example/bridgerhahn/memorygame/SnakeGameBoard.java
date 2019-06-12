@@ -23,11 +23,6 @@ public class SnakeGameBoard extends GameBoard implements Runnable {
     private Direction direction;
     private LinkedList<int[]> segments;
 
-    private float leftQuarter;
-    private float rightQuarter;
-    private float topQuarter;
-    private float bottomQuarter;
-
     private static final int MIN_SWIPE_DISTANCE_X = 100;
     private static final int MIN_SWIPE_DISTANCE_Y = 100;
 
@@ -42,11 +37,6 @@ public class SnakeGameBoard extends GameBoard implements Runnable {
         super(context, screenSize, 5);
         cellSize = screenY / NUM_CELLS_HIGH;
         numCellsWide = (int) (screenX / cellSize);
-
-        leftQuarter = screenX / 4;
-        rightQuarter = screenX * 3 / 4;
-        topQuarter = screenY / 4;
-        bottomQuarter = screenY * 3 / 4;
 
         newGame();
     }

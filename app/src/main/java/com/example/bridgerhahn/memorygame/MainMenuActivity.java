@@ -28,6 +28,14 @@ public class MainMenuActivity extends AppCompatActivity {
                 selectSnake();
             }
         });
+
+        Button tetrisGameButton = findViewById(R.id.tetrisGameButton);
+        tetrisGameButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectTetris();
+            }
+        });
     }
 
     private void selectMemory() {
@@ -38,6 +46,11 @@ public class MainMenuActivity extends AppCompatActivity {
 
     private void selectSnake() {
         Intent intent = new Intent(this, SnakeGameActivity.class);
+        startActivity(intent);
+    }
+
+    private void selectTetris() {
+        Intent intent = new Intent(this, TetrisGameActivity.class);
         startActivity(intent);
     }
 }

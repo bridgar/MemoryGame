@@ -21,10 +21,12 @@ public abstract class GameBoard extends SurfaceView implements Runnable {
 
     // Control frame rate
     protected long nextFrameTime;
+    protected long nextDrawTime;
     protected long flipBackTime;
     protected boolean needsFlipBack = false;
     protected final long SECONDS_BEFORE_FLIP_BACK = 1;
-    protected final long FPS;
+    protected long FPS;
+    protected final long GFPS;
     protected final long MILLIS_PER_SECOND = 1000;
 
     // Is the game currently running?
@@ -42,6 +44,7 @@ public abstract class GameBoard extends SurfaceView implements Runnable {
     GameBoard(Context context, Point screenSize) {
         super(context);
         FPS = 10; //default fps
+        GFPS = 10; //default gfps
 
         this.context = context;
         screenX = screenSize.x;
@@ -56,6 +59,7 @@ public abstract class GameBoard extends SurfaceView implements Runnable {
     GameBoard(Context context, Point screenSize, long fps) {
         super(context);
         FPS = fps;
+        GFPS = fps;
 
         this.context = context;
         screenX = screenSize.x;
@@ -74,9 +78,11 @@ public abstract class GameBoard extends SurfaceView implements Runnable {
     public void run() {
         while(isPlaying) {
             // Update at desired FPS
+            if(drawRequired()) {
+                draw();
+            }
             if(updateRequired()) {
                 update();
-                draw();
             }
         }
     }
@@ -98,8 +104,15 @@ public abstract class GameBoard extends SurfaceView implements Runnable {
     }
 
 
+    private boolean drawRequired() {
+        if(nextDrawTime <= System.currentTimeMillis()) {
+            nextDrawTime = System.currentTimeMillis() + MILLIS_PER_SECOND / GFPS;
+            return true;
+        }
+        return false;
+    }
+
     private boolean updateRequired() {
-        // Do we need an update
         if(nextFrameTime <= System.currentTimeMillis()) {
             nextFrameTime = System.currentTimeMillis() + MILLIS_PER_SECOND / FPS;
 
